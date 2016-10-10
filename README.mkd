@@ -1,0 +1,42 @@
+## certcheck
+
+Basic tool to check a bulk of host:port pairs if the SSL certificate
+used by the SSL/TLS server on that port is valid.
+
+The routine is SNI-aware. STARTTLS support is going to be implemented
+sometime later.
+
+### Synopsis
+
+```
+usage: certcheck [-h] [-l FILE] [-t N] [host:port [host:port ...]]
+
+Batch x509 certificate validity checker
+
+positional arguments:
+  host:port             TLS/SSL host
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l FILE, --host-list FILE
+                        File with a host:port list
+  -t N, --threads N     Number of servers to check in parallel
+```
+
+### Output sample
+
+```
+$ ./certcheck blog.fefe.de heise.de hackerne.ws
+ Host (SNI)   | Port | Crt Issuer        | Delta to expiry          | Status
+--------------+------+-------------------+--------------------------+--------------------
+ blog.fefe.de | 443  | Let's Encrypt     | 58 days, 22:46:24.010108 | VALID
+ heise.de     | 443  | COMODO CA Limited | 445 days, 8:20:22.480263 | VALID
+ hackerne.ws  | 443  | GeoTrust Inc.     | 20 days, 12:52:50.547131 | VALID
+```
+
+### Requirements
+
+* Python 3.2 or later
+* python-pyopenssl
+* python-termcolor
+* python-terminaltables

@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+from OpenSSL import SSL
+from argparse import ArgumentParser
+from termcolor import colored
+from terminaltables import AsciiTable
+import concurrent.futures
+import datetime
+import socket
+import sys
+
+def portmap(e):
+    (host, *port) = e.split(':', 1)
+    if len(port)>0:
+        return (host, int(port[0]))
+    else:
+        return (host, 443)
+
+def parse_asn1gt(tsbytes):
+    return datetime.datetime.strptime(tsbytes.decode(),
+            "%Y%m%d%H%M%SZ") # UTC only
+
+def certificate_validity(host):
+    addr = portmap(host)
+    ctx = SSL.Context(SSL.TLSv1_2_METHOD)
+    conn = SSL.Connection(ctx, socket.socket(socket.AF_INET,
+        socket.SOCK_STREAM))
+    conn.set_tlsext_host_name(bytes(addr[0], "utf8"))
+    try:
+        conn.connect(addr)
+        conn.do_handshake()
+        crt = conn.get_peer_certificate()
+        conn.shutdown()
+        conn.close()
+    except BaseException as err:
+        print(host, ":", err)
+        return None
+    return  {
+                "addr": addr,
+                "to": parse_asn1gt(crt.get_notAfter()),
+                "interval": parse_asn1gt(crt.get_notAfter()) - datetime.datetime.utcnow(),
+                "expired": crt.has_expired(),
+                "issuer": crt.get_issuer().O
+            }
+
+def parse_cmdline():
+    ap = ArgumentParser(description="Batch x509 certificate validity checker")
+    ap.add_argument("-l", "--host-list", metavar="FILE", help="File with a host:port list")
+    ap.add_argument("-t", "--threads", metavar="N", type=int, default=4, help="Number of servers to check in parallel")
+    ap.add_argument("hosts", metavar="host:port", help="TLS/SSL host", nargs="*")
+    return ap.parse_args()
+
+def lost_host_list(path):
+    h = []
+    try:
+        with open(path, "r") as FILE:
+            for line in FILE:
+                h.append(line[:-1])
+    except BaseException as err:
+        print("Could not open config file:", err)
+    return h
+
+def output(rows):
+    tok = colored("VALID", "green", attrs=["bold"])
+    tfail = colored("INVALID", "red", attrs=["bold"])
+    def statustext(expired):
+        if expired is False:
+            return tok
+        else:
+            return tfail
+    rbuf = [ [ "Host (SNI)", "Port", "Crt Issuer", "Delta to expiry", "Status" ] ] + list(map(lambda d: [
+        d["addr"][0],
+        str(d["addr"][1]),
+        d["issuer"],
+        str(d["interval"]),
+        statustext(d["expired"]) ],
+        rows))
+    t = AsciiTable(rbuf)
+    t.outer_border = False
+    print(t.table)
+
+if __name__ == "__main__":
+    opts = parse_cmdline()
+    if opts.host_list:
+        opts.hosts += lost_host_list(opts.host_list)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=opts.threads) as E:
+        res = [ x for x in list(E.map(certificate_validity, opts.hosts))
+                if x is not None ]
+    output(res)
