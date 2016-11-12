@@ -20,9 +20,18 @@ def parse_asn1gt(tsbytes):
     return datetime.datetime.strptime(tsbytes.decode(),
             "%Y%m%d%H%M%SZ") # UTC only
 
+def sel_tls_method():
+    pref = [ "TLSv1_2_METHOD", "TLSv1_1_METHOD", "TLSv1_METHOD",
+            "SSLv3_METHOD", "SSLv2_METHOD" ]
+    for const in pref:
+        if hasattr(SSL, const):
+            return getattr(SSL, const)
+        else:
+            raise BaseException("No preferred TLS/SSL method supported")
+
 def certificate_validity(host):
     addr = portmap(host)
-    ctx = SSL.Context(SSL.TLSv1_2_METHOD)
+    ctx = SSL.Context(sel_tls_method())
     conn = SSL.Connection(ctx, socket.socket(socket.AF_INET,
         socket.SOCK_STREAM))
     conn.set_tlsext_host_name(bytes(addr[0], "utf8"))
