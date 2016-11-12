@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Certcheck by 2ion</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Certcheck</h1>
+        <p>CLI tool to check x.509 cert validity on a set of TLS/SSL servers</p>
+
+        <p class="view"><a href="https://github.com/2ion/certcheck">View the Project on GitHub <small>2ion/certcheck</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/2ion/certcheck/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/2ion/certcheck/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/2ion/certcheck">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>Basic tool to check a bulk of host:port pairs if the SSL certificate
+used by the SSL/TLS server on that port is valid. The author uses it to
+generate email reports of the status of his SSL properties.</p>
+
+<p>The routine is SNI-aware. STARTTLS support is going to be implemented
+sometime later.</p>
+
+<h3>
+<a id="synopsis" class="anchor" href="#synopsis" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Synopsis</h3>
+
+<pre><code>usage: certcheck [-h] [-l FILE] [-t N] [host:port [host:port ...]]
+
+Batch x509 certificate validity checker
+
+positional arguments:
+  host:port             TLS/SSL host
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l FILE, --host-list FILE
+                        File with a host:port list
+  -t N, --threads N     Number of servers to check in parallel
+</code></pre>
+
+<h3>
+<a id="output-sample" class="anchor" href="#output-sample" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Output sample</h3>
+
+<pre><code>$ ./certcheck blog.fefe.de heise.de hackerne.ws
+ Host (SNI)   | Port | Crt Issuer        | Delta to expiry          | Status
+--------------+------+-------------------+--------------------------+--------------------
+ blog.fefe.de | 443  | Let's Encrypt     | 58 days, 22:46:24.010108 | VALID
+ heise.de     | 443  | COMODO CA Limited | 445 days, 8:20:22.480263 | VALID
+ hackerne.ws  | 443  | GeoTrust Inc.     | 20 days, 12:52:50.547131 | VALID
+</code></pre>
+
+<h3>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h3>
+
+<ul>
+<li>Python 3.2 or later</li>
+<li>python-pyopenssl</li>
+<li>python-termcolor</li>
+<li>python-terminaltables</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/2ion">2ion</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
