@@ -1,7 +1,8 @@
 ## certcheck
 
 Basic tool to check a bulk of host:port pairs if the SSL certificate
-used by the SSL/TLS server on that port is valid.
+used by the SSL/TLS server on that port is valid. The author uses it to
+generate email reports of the status of his SSL properties.
 
 The routine is SNI-aware. STARTTLS support is going to be implemented
 sometime later.
